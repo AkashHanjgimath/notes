@@ -1,0 +1,42 @@
+🔹 1. Thread-Safety
+HashMap is not thread-safe. It should be used in single-threaded applications or externally synchronized if needed.
+
+Hashtable is thread-safe. All its methods are synchronized, making it slower in concurrent environments.
+
+LinkedHashMap is also not thread-safe, just like HashMap.
+
+🔹 2. Null Keys and Null Values
+HashMap allows one null key and multiple null values.
+
+Hashtable does not allow null keys or null values.
+
+LinkedHashMap also allows one null key and multiple null values, just like HashMap.
+
+🔹 3. Ordering of Entries
+HashMap does not maintain any order (neither insertion nor access order).
+
+Hashtable also does not maintain any order.
+
+LinkedHashMap maintains the insertion order of entries. It can also be configured to maintain access order (useful for LRU cache).
+
+🔹 4. Performance
+HashMap is faster than Hashtable because it is unsynchronized.
+
+Hashtable is slower due to synchronization overhead.
+
+LinkedHashMap is slightly slower than HashMap because it maintains a doubly linked list for insertion/access order.
+
+🔹 5. Use Case Recommendations
+Use HashMap when you don’t need order and are working in a single-threaded environment.
+
+Avoid Hashtable in modern applications. If thread safety is needed, prefer ConcurrentHashMap.
+
+Use LinkedHashMap when you need to maintain the insertion order or create LRU cache behavior.
+
+🔹 6. Summary
+HashMap = Fast, nulls allowed, no order, not thread-safe.
+
+Hashtable = Legacy, synchronized, no nulls, slow.
+
+LinkedHashMap = Maintains insertion/access order, nulls allowed, not thread-safe.
+
