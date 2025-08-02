@@ -1,0 +1,248 @@
+🔹 1. What is HashMap?
+A key-value data structure in Java.
+
+Provides constant-time (O(1)) performance on average for insert and retrieve operations.
+
+Uses hashing internally for fast access.
+
+🔹 2. Internal Data Structure
+HashMap uses an array of Node<K, V> called table.
+
+Each slot in the array is called a bucket.
+
+🔸 What is a Node?
+A Node is an internal class used to store a key-value pair along with the key’s hash and a pointer to the next Node (for handling collisions).
+
+java
+Copy
+Edit
+class Node<K,V> {
+    final int hash;
+    final K key;
+    V value;
+    Node<K,V> next;
+}
+👉 Purpose: Holds one key-value pair and links to the next node if multiple keys hash to the same bucket.
+
+🔹 3. Step-by-Step put(K key, V value) Execution
+✅ Step 1: Compute Hash
+hashCode() of the key is calculated.
+
+A better hash is derived by applying bit manipulation to reduce collisions.
+
+✅ Step 2: Find Bucket Index
+Index = (n - 1) & hash where n is the array length.
+
+This gives the position in the array where the key-value should go.
+
+✅ Step 3: Check Bucket
+If table[index] is null, store the new node directly.
+
+✅ Step 4: Handle Collision
+If already a node exists at index:
+
+Traverse the list.
+
+If a node with the same key is found, update the value.
+
+If key is not found, add new node at the end.
+
+✅ Step 5: Treeify (if needed)
+If number of nodes in a bucket ≥ TREEIFY_THRESHOLD (8), and table size ≥ 64, convert list to a Red-Black Tree for better performance.
+
+✅ Step 6: Resize (if needed)
+If size > capacity * loadFactor, resize (double the capacity) and rehash all entries.
+
+🔹 4. Step-by-Step get(K key) Execution
+✅ Step 1: Compute Hash
+Same hashing method as put().
+
+✅ Step 2: Find Bucket
+Locate the correct index in the array using the hash.
+
+✅ Step 3: Search Node
+Traverse the bucket:
+
+If list: check each node’s key using equals().
+
+If tree: do binary search using key comparison.
+
+Return the value if key matches, else return null.
+
+🔹 5. Load Factor (Resize Threshold)
+Default: 0.75 (75%)
+
+Determines when to resize HashMap to maintain performance.
+
+When size exceeds capacity * loadFactor, HashMap doubles the size and rehashes entries.
+
+Rehashing is expensive (O(n)), so initial capacity should be estimated carefully.
+
+🔹 6. Collision Handling
+Multiple keys may hash to the same index (collision).
+
+Handled using:
+
+Linked List chaining (initially).
+
+Red-Black Tree (Java 8+) if too many collisions occur (≥ 8).
+
+🔹 7. Treeify Threshold
+✅ Constants:
+java
+Copy
+Edit
+TREEIFY_THRESHOLD = 8
+MIN_TREEIFY_CAPACITY = 64
+✅ Conditions:
+If bucket size ≥ 8 AND table capacity ≥ 64 → convert bucket’s list into Red-Black Tree.
+
+If capacity < 64 → resize instead of treeify.
+
+✅ Why Treeify?
+List lookup is O(n), tree lookup is O(log n).
+
+Prevents performance drop in worst-case scenarios.
+
+🔹 8. Resize Mechanism
+Triggered when size > capacity * loadFactor.
+
+Steps:
+
+New capacity = old capacity × 2.
+
+All existing entries are rehashed and stored in new positions.
+
+Costly operation — avoid frequent resizing by setting proper initial capacity.
+
+🔹 9. Custom Key Usage
+To use custom objects as keys in HashMap:
+
+Must override hashCode() → for correct bucket placement.
+
+Must override equals() → for correct key matching in collisions.
+
+If not done → get() and put() may behave incorrectly.
+
+🔹 10. Performance Overview
+| Operation       | Best Case | Worst Case (pre Java 8) | Worst Case (Java 8+) |
+| --------------- | --------- | ----------------------- | -------------------- |
+| `put()`/`get()` | O(1)      | O(n) (linked list)      | O(log n) (tree)      |
+| Resize          | O(n)      | O(n)                    | O(n)                 |
+
+
+
+🔹 11. Constants Summary
+java
+Copy
+Edit
+DEFAULT_INITIAL_CAPACITY = 16
+DEFAULT_LOAD_FACTOR = 0.75f
+TREEIFY_THRESHOLD = 8
+UNTREEIFY_THRESHOLD = 6
+MIN_TREEIFY_CAPACITY = 64
+
+🔹 12. Visual Flow Summary
+
+put(key, value)
+ → compute hash
+ → get index
+ → insert new Node OR handle collision
+ → check if treeify is needed
+ → resize if needed
+
+get(key)
+ → compute hash
+ → get index
+ → search key in bucket (list/tree)
+ → return value if found
+
+✅ remove(key) in HashMap – Internal Working
+🔹 Purpose:
+Removes the key-value pair from the map if the key exists.
+
+🔧 Step-by-Step Working of remove(key)
+1️⃣ Calculate Hash
+
+hashCode() of the key is called.
+
+Then passed to internal hash() method for better distribution.
+
+Example:
+int hash = hash(key.hashCode());
+
+2️⃣ Find Bucket Index
+
+Index is calculated using:
+int index = (n - 1) & hash; // where n = table.length
+
+This gives the position in the internal array (table[]).
+
+3️⃣ Search the Bucket
+
+Get the first node in that index:
+Node<K,V> first = table[index];
+
+4️⃣ Traverse the Linked List or Tree
+
+Loop through the linked list or Red-Black tree nodes at that index.
+
+For each node:
+
+Compare hash
+
+Compare key using equals()
+
+5️⃣ If Matching Node Found – Remove It
+
+If node is the first: update table[index] = e.next;
+
+If node is in middle or end: update prev.next = e.next;
+
+6️⃣ If Bucket is a Tree (TreeNode)
+
+Use TreeNode.removeTreeNode()
+
+Unlinks node and rebalances Red-Black tree if needed.
+
+7️⃣ Update size and modCount
+
+size--
+
+modCount++ → important for fail-fast iterators
+
+8️⃣ Return Value
+
+If key is found → return the value
+
+If key is not found → return null
+
+📌 Simplified Internal Code
+
+java
+Copy
+Edit
+Node<K,V> e = table[index];
+Node<K,V> prev = null;
+
+while (e != null) {
+    if (e.hash == hash && (e.key.equals(key))) {
+        if (prev == null)
+            table[index] = e.next; // remove first node
+        else
+            prev.next = e.next;    // remove middle/end node
+        size--;
+        modCount++;
+        return e.value;
+    }
+    prev = e;
+    e = e.next;
+}
+return null;
+🌳 If Bucket is a Tree
+
+If the bucket is treeified:
+
+Call removeTreeNode()
+
+Adjust tree structure accordingly
